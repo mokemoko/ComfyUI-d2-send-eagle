@@ -1,5 +1,7 @@
 from os import name
 from typing import Dict, Optional, TypedDict, Union, List
+import base64
+import mimetypes
 import requests
 
 class FolderInfo(TypedDict):
@@ -14,10 +16,15 @@ class EagleAPI:
 
     # #########################################
     # 画像をEagleに送信
+    # addFromPath は Eagle がファイルを読みに行くので、ComfyUI が別マシンだと読めず、同一マシンでも反映が遅い。
+    # 画像本体を data: URL にして addFromURL で送る
     def add_item_from_path(self, data, folder_id=None):
+        path = data.pop("path")
+        with open(path, "rb") as f:
+            data["url"] = f"data:{mimetypes.guess_type(path)[0]};base64," + base64.b64encode(f.read()).decode()
         if folder_id:
             data["folderId"] = folder_id
-        return self._send_request("/api/item/addFromPath", method="POST", data=data)
+        return self._send_request("/api/item/addFromURL", method="POST", data=data)
 
 
     # #########################################

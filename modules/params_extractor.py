@@ -112,7 +112,7 @@ class ParamsExtractor:
             for k, v in self._prompt.items()
             if v["class_type"] in self.config["ksamplers"]
         ]
-        return sorted(ksamplers, key=lambda x: int(x[0]))
+        return sorted(ksamplers, key=lambda x: [int(i) for i in x[0].split(":")])  # サブグラフ内の ID は "459:458" 形式
 
 
     # ######################
